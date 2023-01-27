@@ -40,6 +40,7 @@ versions.androidTargetSdk = 32
 versions.androidMinSdk = 14
 versions.androidBuildTools = "33.0.0"
 versions.androidFragment = "1.2.3"
+versions.androidMaterial = "1.6.0"
 versions.javaparser = "2.3.0"
 versions.spotless = "6.7.1"
 
@@ -123,7 +124,8 @@ libraries.robovm = [
 ]
 
 libraries.android = [
-        "androidx.fragment:fragment:${versions.androidFragment}"
+        "androidx.fragment:fragment:${versions.androidFragment}",
+        "com.google.android.material:material:${versions.androidMaterial}"
 ]
 
 libraries.gwt = [

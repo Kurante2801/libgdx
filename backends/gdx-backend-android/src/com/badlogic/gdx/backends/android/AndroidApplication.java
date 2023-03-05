@@ -176,7 +176,7 @@ public class AndroidApplication extends Activity implements AndroidApplicationBa
 		// detect an already connected bluetooth keyboardAvailable
 		if (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS) input.setKeyboardAvailable(true);
 
-		if (Build.VERSION.SDK_INT >= 30) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 			keyboardHeightProvider = new AndroidRKeyboardHeightProvider(this);
 		} else {
 			keyboardHeightProvider = new StandardKeyboardHeightProvider(this);

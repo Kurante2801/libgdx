@@ -204,6 +204,7 @@ public class GdxTests {
 		NoncontinuousRenderingTest.class,
 		OctreeTest.class,
 		OnscreenKeyboardTest.class,
+		NativeInputTest.class,
 		OrientedBoundingBoxTest.class,
 		PathTest.class,
 		ParallaxTest.class,

@@ -31,6 +31,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.backends.android.keyboardheight.AndroidXKeyboardHeightProvider;
+import com.badlogic.gdx.backends.android.keyboardheight.KeyboardHeightProvider;
+import com.badlogic.gdx.backends.android.keyboardheight.StandardKeyboardHeightProvider;
 import com.badlogic.gdx.backends.android.surfaceview.FillResolutionStrategy;
 import com.badlogic.gdx.utils.*;
 
@@ -60,6 +63,7 @@ public class AndroidApplication extends Activity implements AndroidApplicationBa
 	protected boolean useImmersiveMode = false;
 	private int wasFocusChanged = -1;
 	private boolean isWaitingForAudio = false;
+	private KeyboardHeightProvider keyboardHeightProvider;
 
 	/** This method has to be called in the {@link Activity#onCreate(Bundle)} method. It sets up all the things necessary to get
 	 * input, render via OpenGL and so on. Uses a default {@link AndroidApplicationConfiguration}.
@@ -171,6 +175,14 @@ public class AndroidApplication extends Activity implements AndroidApplicationBa
 
 		// detect an already connected bluetooth keyboardAvailable
 		if (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS) input.setKeyboardAvailable(true);
+
+		// As per the docs, it might work unreliable < 23 https://developer.android.com/jetpack/androidx/releases/core#1.5.0-alpha02
+		// So, I guess since 23 is pretty rare we can use the old API for the users
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			keyboardHeightProvider = new AndroidXKeyboardHeightProvider(this);
+		} else {
+			keyboardHeightProvider = new StandardKeyboardHeightProvider(this);
+		}
 	}
 
 	protected FrameLayout.LayoutParams createLayoutParams () {
@@ -238,6 +250,7 @@ public class AndroidApplication extends Activity implements AndroidApplicationBa
 		graphics.onPauseGLSurfaceView();
 
 		super.onPause();
+		keyboardHeightProvider.setKeyboardHeightObserver(null);
 	}
 
 	@Override
@@ -266,11 +279,19 @@ public class AndroidApplication extends Activity implements AndroidApplicationBa
 			this.isWaitingForAudio = false;
 		}
 		super.onResume();
+		keyboardHeightProvider.setKeyboardHeightObserver((DefaultAndroidInput)Gdx.input);
+		((AndroidGraphics)getGraphics()).getView().post(new Runnable() {
+			@Override
+			public void run () {
+				keyboardHeightProvider.start();
+			}
+		});
 	}
 
 	@Override
 	protected void onDestroy () {
 		super.onDestroy();
+		keyboardHeightProvider.close();
 	}
 
 	@Override
@@ -492,5 +513,9 @@ public class AndroidApplication extends Activity implements AndroidApplicationBa
 	protected AndroidFiles createFiles () {
 		this.getFilesDir(); // workaround for Android bug #10515463
 		return new DefaultAndroidFiles(this.getAssets(), this, true);
+	}
+
+	public KeyboardHeightProvider getKeyboardHeightProvider () {
+		return keyboardHeightProvider;
 	}
 }
